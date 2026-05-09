@@ -135,7 +135,6 @@ into memory and where, then jump to the entry point to begin execution.
 ---
 
 
-
 ## Author
 
 Muhammad Haider Ali
