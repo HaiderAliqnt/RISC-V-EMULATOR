@@ -70,7 +70,7 @@ riscv-emulator/
 ## Build Instructions
 
 ```bash
-git clone https://github.com/yourusername/riscv-emulator.git
+git clone https://github.com/HaiderAliqnt/RISC-V-EMULATOR
 cd riscv-emulator
 mkdir build && cd build
 cmake ..
