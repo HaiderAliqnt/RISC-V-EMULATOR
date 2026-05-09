@@ -120,76 +120,6 @@ into memory and where, then jump to the entry point to begin execution.
 
 ---
 
-## Build Order — Step by Step
-
-### Step 1 — Study the Architecture
-Before writing any code, read through the RISC-V unprivileged specification and the
-KU LEUVEN assembly guide. Understand all six instruction formats and the RV32I base
-instruction set. Write nothing yet.
-
-### Step 2 — Set Up the Project
-Initialize the repository. Write the CMakeLists.txt. Create the directory structure.
-Confirm the build system compiles an empty main.c cleanly.
-
-### Step 3 — Implement Memory
-Write memory.c. Represent memory as a flat byte array. Implement read and write
-functions for 8, 16, and 32 bit accesses. Test it in isolation with hardcoded values
-before connecting anything else.
-
-### Step 4 — Implement the CPU State
-Write cpu.c. Define the CPU struct — 32 registers and the program counter. Write
-functions to read and write registers, enforcing the x0 zero rule. Nothing executes yet.
-
-### Step 5 — Implement the Decoder
-Write decoder.c. Take a raw 32-bit instruction integer and extract every field using
-bitwise operations — opcode, rd, rs1, rs2, funct3, funct7, and each immediate format.
-This is the most detail-oriented part of the project. Test each extraction function
-against known instruction encodings before moving on.
-
-### Step 6 — Implement the Fetch-Decode-Execute Loop
-Wire up the loop in main.c. Fetch the instruction at the PC address from memory,
-pass it to the decoder, pass the decoded fields to the executor (stub for now),
-then increment the PC. Confirm the loop runs without crashing on a hardcoded instruction.
-
-### Step 7 — Implement RV32I Instructions
-Write executor.c. Implement each of the 47 base integer instructions one at a time.
-Group them by type — arithmetic, logical, shift, branch, load, store, jump.
-After each group, write a test in tests/ that runs a small hand-assembled binary
-and checks register and memory state.
-
-Suggested order:
-- LUI, AUIPC
-- JAL, JALR
-- Branch instructions (BEQ, BNE, BLT, BGE, BLTU, BGEU)
-- Load instructions (LB, LH, LW, LBU, LHU)
-- Store instructions (SB, SH, SW)
-- Arithmetic immediate (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
-- Arithmetic register (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
-
-### Step 8 — Run a Hand-Written Binary
-Assemble a small RISC-V program by hand — a loop that adds numbers, or a fibonacci
-sequence. Load it into the memory array manually. Step through it instruction by
-instruction and verify the register values match your expectations. This is your first
-real test that the emulator is correct.
-
-### Step 9 — Write the ELF Loader
-Write elf_loader.c. Parse the ELF header to extract the entry point address. Iterate
-the program headers and copy each loadable segment into the correct memory address.
-Set the PC to the entry point. Test by loading a simple ELF binary compiled with a
-RISC-V cross compiler (riscv64-unknown-elf-gcc) and confirming it executes correctly.
-
-### Step 10 — Add Memory Mapped I/O
-Extend memory.c to intercept reads and writes to specific address ranges. Implement
-a UART output handler at the standard address so the emulator can print characters.
-Confirm by running a RISC-V hello world binary and seeing the output in the terminal.
-
-### Step 11 — Run DOOM
-Obtain a RISC-V port of DOOM compiled as an ELF binary. Add the display and input
-memory mapped I/O handlers DOOM requires. Load the binary and the DOOM WAD file.
-Debug until it boots. This step will surface every gap in your emulator's correctness.
-
----
-
 ## Milestones
 
 | Milestone | Description |
@@ -204,16 +134,7 @@ Debug until it boots. This step will surface every gap in your emulator's correc
 
 ---
 
-## Notes
 
-Do not look at the reference implementation (rvcore) until you are stuck. The value
-of this project is in working through the problems yourself. Use it to verify your
-approach or debug a specific issue, not as a template to follow.
-
-Every time something breaks, use it as an opportunity to understand why before fixing it.
-The bugs in this project are the learning.
-
----
 
 ## Author
 
