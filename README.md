@@ -80,7 +80,7 @@ make
 
 ---
 
-## Core Concepts to Understand Before Starting
+## Core Concepts 
 
 ### The Fetch-Decode-Execute Cycle
 Every CPU runs this loop forever. Your emulator is a software implementation of it:
