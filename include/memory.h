@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define MEMORY_SIZE 0X10000000 //256MB  
+#define MEMORY_SIZE 0X10000000 //256MB
 
 #define UART_BASE 0X10000000 //Mem mapped I/O addr
 
