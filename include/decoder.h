@@ -13,7 +13,7 @@ typedef struct {
     int32_t imm;
 } instr_fields;
 
-struct instr_fields decoder_function(uint32_t instruction);
+instr_fields decoder_function(uint32_t instruction);
 
 
 
