@@ -31,7 +31,8 @@ static int32_t decode_imm_s(uint32_t instruction){
 static int32_t decode_imm_u(uint32_t instruction){
     //imm is bits 31:12 shifted left by 12, lower 12 bits are zero ...apply the mask directly since the bits have already been shifted
     //no sign extension required since the lower bits are zeroed out
-    int32_t imm = ((instruction) & ((1 << 20) - 1));
+    // int32_t imm = ((instruction) & ((1 << 20) - 1)); //can not use this mask since this only works if we want to keep the N lower bits as 1 but here we need the upper bits so we will have to use hexa mas direct
+    int32_t imm = instruction & 0xFFFFF000;
     return imm;
 }
 
