@@ -9,6 +9,14 @@ add_compile_options(-Wall -Wextra)
 add_executable(emulator
     src/main.c
     src/memory.c
+    src/cpu.c
+    src/decoder.c
 )
+add_executable(test_decoder
+    tests/test_decoder_functions.c
+    src/decoder.c
+)
+
+target_include_directories(test_decoder PRIVATE include)
 
 target_include_directories(emulator PRIVATE include)
