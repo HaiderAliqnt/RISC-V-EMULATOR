@@ -16,7 +16,11 @@ add_executable(test_decoder
     tests/test_decoder_functions.c
     src/decoder.c
 )
+add_executable(test_memory
+    tests/test_memory_functions.c
+    src/memory.c
+)
 
 target_include_directories(test_decoder PRIVATE include)
-
+target_include_directories(test_memory PRIVATE include)
 target_include_directories(emulator PRIVATE include)
