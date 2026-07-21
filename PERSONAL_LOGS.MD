@@ -72,3 +72,19 @@ added the check directly in the write function so nothing downstream has to worr
 ### DAY 14 :
 stopping here per the plan - nothing executes yet, this step is only state management
 next up is wiring memory.c testing before moving into actual instruction execution
+
+DAY 15 :
+
+went back and cleared the leftover checkbox from step 3 - isolated testing of memory.c poked known hardcoded values directly into the memory array, read them back with the 8/16/32-bit read functions confirmed the little-endian byte assembly actually matches what i expect before trusting it with real instructions
+
+DAY 16 :
+
+implemented fetch - grabs the raw 32-bit instruction word from memory at pc, reused the existing 32-bit read function instead of duplicating logic also handled pc increment right after, +4 every cycle since instructions are word aligned, gets overridden later by jumps/branches
+
+DAY 17 :
+
+wrote decoder.c extracted opcode/rd/funct3/rs1/rs2/funct7 with bitwise shift-and-mask, then did immediate assignment for all five formats (I/S/B/U/J), each one reconstructed bit slice by bit slice with sign extension applied at the end
+
+DAY 18 :
+
+wired fetch, decode, and execute into one full cycle decoder fully implemented now, all six formats identified and immediates coming out correctly cpu can now actually fetch -> decode -> execute in a loop, next step is filling out the execute logic per instruction
