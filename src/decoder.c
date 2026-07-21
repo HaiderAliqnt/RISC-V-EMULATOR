@@ -77,12 +77,12 @@ instr_fields decoder_function(uint32_t instruction){
     //first we will extract all the gen fields that are consistent for evry instr
 
      instr_fields fields = {0};
-     fields.opcode = (instruction)  & 0x7F ;  //0111 1111
-     fields.rd = (instruction >> 7) & 0x1F ;  //0001 1111
-     fields.funct3 = (instruction >> 12) & 0x07 ; //0000 0111
-     fields.rs1 = (instruction >> 15) & 0x1F ; //0001 1111
-     fields.rs2 = (instruction >> 20) & 0x1F ; //0001 1111
-     fields.funct7 = (instruction >> 25) & 0x7F ; //0111 1111
+     fields.opcode = (instruction)  & ((1 << 7) -1) ;  //0111 1111
+     fields.rd = (instruction >> 7) & ((1 << 5) -1) ;  //0001 1111
+     fields.funct3 = (instruction >> 12) & ((1 << 3) -1); //0000 0111
+     fields.rs1 = (instruction >> 15) & ((1 << 5) -1) ; //0001 1111
+     fields.rs2 = (instruction >> 20) & ((1 << 5) -1) ; //0001 1111
+     fields.funct7 = (instruction >> 25) & ((1 << 7) -1) ; //0111 1111
 
      //using a switch case statement to assign immediates if needed
      //for same instruction types but diff opcode we use fallbacks to avoid using same function twice and creating duplicates
