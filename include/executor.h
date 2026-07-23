@@ -90,7 +90,7 @@ enum InstructionType {
 };
 
 
-enum InstructionType decode_instruction_type(instr_fields fields);
-void execute_instruction(CPU *cpu, instr_fields fields , enum InstructionType);
+
+void execute_instruction(CPU *cpu, instr_fields f);
 
 #endif
