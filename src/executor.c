@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../include/executor.h"
-#include "cpu.h"
-#include "decoder.h"
-#include "memory.h"
+#include "../include/cpu.h"
+#include "../include/decoder.h"
+#include "../include/memory.h"
 
 static void exec_lui(CPU * cpu , instr_fields f){
 
@@ -82,7 +82,7 @@ static void exec_blt(CPU * cpu , instr_fields f){
 
     int32_t val1 = cpu_read_register(f.rs1, cpu);
     int32_t val2 = cpu_read_register(f.rs2, cpu);
-
+    printf("BLT: val1=%d val2=%d imm=%d\n", val1, val2, f.imm);
     if(val1 < val2){ //if this condition is true the branch will be taken
         cpu->pc = cpu->pc + f.imm;
     }
@@ -298,6 +298,7 @@ static void exec_srai(CPU * cpu , instr_fields f){
 
 static void exec_add(CPU * cpu , instr_fields f){
 
+    printf("ADD: rd=%d rs1=%d rs2=%d\n", f.rd, f.rs1, f.rs2);
     uint32_t val1 = cpu_read_register(f.rs1, cpu);
     uint32_t val2 = cpu_read_register(f.rs2, cpu);
     uint32_t ans = val1 + val2;
@@ -419,6 +420,8 @@ static void exec_ebreak(CPU *cpu) {
 }
 
 void execute_instruction(CPU *cpu, instr_fields f) {
+
+    printf("executing opcode: 0x%02X funct3: 0x%02X\n", f.opcode, f.funct3);
     switch (f.opcode) {
         case OP_LUI:
             exec_lui(cpu, f);

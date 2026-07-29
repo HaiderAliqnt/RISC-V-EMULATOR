@@ -63,7 +63,7 @@ static int32_t decode_imm_j(uint32_t instruction){
     int32_t imm = ((instruction >> 21) & ((1 << 10) - 1)) << 1;
     imm |= ((instruction >> 20) & ((1 << 1) -1)) << 11;
     imm |= ((instruction >> 12) & ((1 << 8) -1)) << 12;
-    imm |= ((instruction >> 30) & ((1 << 1) -1)) << 20;
+    imm |= ((instruction >> 31) & ((1 << 1) -1)) << 20;
 
     int32_t sig_ext_imm = sign_extend(imm, 20);
     return sig_ext_imm;
@@ -77,6 +77,12 @@ instr_fields decoder_function(uint32_t instruction){
 
     //first we will extract all the gen fields that are consistent for evry instr
 
+    //debugging block
+        // printf("SIZE OF UINT32: %zu\n", sizeof(uint32_t)); /
+        // printf("RAW HEX: 0x%08X\n", instruction);
+        // printf("SHIFTED: 0x%08X\n", instruction >> 12);
+        // printf("MASKED:  0x%08X\n", (instruction >> 12) & 0x7);
+
      instr_fields fields = {0};
      fields.opcode = (instruction)  & ((1 << 7) -1) ;  //0111 1111
      fields.rd = (instruction >> 7) & ((1 << 5) -1) ;  //0001 1111
@@ -84,7 +90,12 @@ instr_fields decoder_function(uint32_t instruction){
      fields.rs1 = (instruction >> 15) & ((1 << 5) -1) ; //0001 1111
      fields.rs2 = (instruction >> 20) & ((1 << 5) -1) ; //0001 1111
      fields.funct7 = (instruction >> 25) & ((1 << 7) -1) ; //0111 1111
+     printf("DECODER: raw=0x%08X opcode=0x%02X funct3=0x%02X rd=%d rs1=%d rs2=%d\n",
+            instruction, fields.opcode, fields.funct3, fields.rd, fields.rs1, fields.rs2);
 
+
+    uint32_t test = (instruction >> 12) & 0x7;
+    printf("FUNCT3 TEST: raw=0x%08X shift_result=0x%02X\n", instruction, test);
      //using a switch case statement to assign immediates if needed
      //for same instruction types but diff opcode we use fallbacks to avoid using same function twice and creating duplicates
      switch (fields.opcode) {

@@ -88,3 +88,7 @@ wrote decoder.c extracted opcode/rd/funct3/rs1/rs2/funct7 with bitwise shift-and
 DAY 18 :
 
 wired fetch, decode, and execute into one full cycle decoder fully implemented now, all six formats identified and immediates coming out correctly cpu can now actually fetch -> decode -> execute in a loop, next step is filling out the execute logic per instruction
+
+DAY 19 :
+
+completed executor file and implemented all instructions. Then wired it with main.cpp loop.
