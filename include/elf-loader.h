@@ -24,8 +24,7 @@ struct Execution{
 };
 
 
-static bool elf_validate(struct Elf_Header header);
-static void elf_load(const char * path , CPU cpu);
+
 
 
 
