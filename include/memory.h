@@ -9,6 +9,7 @@
 
 void memory_init(void);
 void memory_free(void);
+void memory_zero(uint32_t address, uint32_t size);
 
 uint8_t memory_read8(uint32_t address);
 uint16_t memory_read16(uint32_t address);

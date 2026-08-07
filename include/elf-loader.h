@@ -1,35 +1,29 @@
-#ifndef ELF_LOADER
-#define ELF_LOADER
+#ifndef ELF_LOADER_H
+#define ELF_LOADER_H
 
 #include <stdbool.h>
 #include <stdint.h>
 #include "cpu.h"
 
+struct Elf_Header {
+    uint8_t  mag0, mag1, mag2, mag3, cls, data, version, osabi, abiversion;
+    uint8_t  padding[7];
+    uint16_t type, machine;
+    uint32_t elfversion, entry, phoff, shoff, flags;
+    uint16_t ehsize, phentsize, phnum, shentsize, shnum, shstrndx;
+} __attribute__((packed));
 
+struct Prog_Header {
+    uint32_t type, offset, virtual_addr, paddr, filesz, memsz, flags, align;
+} __attribute__((packed));
 
-struct Elf_Header{
-    uint8_t mag0 , mag1 , mag2, mag3, cls , data , version , osabi , abiversion;
-    uint8_t padding[7];
-    uint16_t type , machine;
-    uint32_t elfversion, entry, phoff, flags;
-    uint16_t ehsize, phentsize, phnum;
+struct Execution {
+    uint32_t entry, num_mem_bytes, offset, nbytes, virtual_addr;
 };
 
-struct Prog_Header{
-    uint32_t type , offset , virtual_addr, size , mem_size;
-};
+void elf_load(const char *path, CPU *cpu);
 
-struct Execution{
-    uint32_t entry , num_mem_bytes , offset , nbytes;
-};
-
-
-
-
-
-
-
-#endif
+#endif // ELF_LOADER_H
 
 
 // mag0        → always 0x7F

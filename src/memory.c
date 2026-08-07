@@ -15,6 +15,13 @@ static int handle_mmio_write(uint32_t address, uint32_t value) {
     return 0;  // not an MMIO address
 }
 
+static void check_bounds(uint32_t address , uint32_t size){
+
+    if(address + size > MEMORY_SIZE){
+        fprintf(stderr, "Memory access out of bounds: 0x%08x \n", address);
+        exit(1);
+    }
+}
 
 void memory_init(void){
 
@@ -35,12 +42,9 @@ void memory_free(void){
     printf("Nothing in memory to free");
 }
 
-static void check_bounds(uint32_t address , uint32_t size){
-
-    if(address + size > MEMORY_SIZE){
-        fprintf(stderr, "Memory access out of bounds: 0x%08x \n", address);
-        exit(1);
-    }
+void memory_zero(uint32_t address, uint32_t size) {
+    check_bounds(address, size);
+    memset(mem + address, 0, size);
 }
 
 uint8_t memory_read8(uint32_t address){
