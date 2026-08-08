@@ -12,6 +12,7 @@ add_executable(emulator
     src/cpu.c
     src/decoder.c
     src/executor.c
+    src/elf-loader.c
 )
 add_executable(test_decoder
     tests/test_decoder_functions.c

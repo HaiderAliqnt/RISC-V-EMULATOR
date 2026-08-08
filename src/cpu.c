@@ -1,4 +1,5 @@
 #include "../include/cpu.h"
+#include "../include/memory.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -7,6 +8,7 @@
 void cpu_init(CPU * cpu){
 
     memset(cpu->regs , 0 , sizeof(cpu->regs)); //memset basically just assigns the given value to n btis of memory
+    cpu->regs[2] = MEMORY_SIZE - 4; //brings the pointer right back up
     cpu->pc = 0X000000000;
 }
 
@@ -21,7 +23,7 @@ uint32_t cpu_read_register(uint8_t index, CPU * cpu){
 void cpu_write_register(uint8_t index, CPU * cpu, uint32_t value){
 
     if(index == 0){
-        printf("Can Not write to register 0");
+        printf("\nCan Not write to register 0\n");
         return;
     }
     cpu->regs[index] = value;
