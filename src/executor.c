@@ -42,8 +42,8 @@ static void exec_jal(CPU * cpu , instr_fields f){
 static void exec_jalr(CPU * cpu , instr_fields f){
 
     uint32_t value = (cpu->pc + 4);
+    uint32_t target = (cpu_read_register(f.rs1, cpu) + f.imm) & ~1; //calculate target and remove the 0 bit
     cpu_write_register(f.rd , cpu, value); //writed pc+4 into rd
-    uint32_t target = (f.imm + f.rs1); //calculate target
     cpu->pc = target; //now give pc that value so it can jump onto it
 
 
@@ -82,7 +82,7 @@ static void exec_blt(CPU * cpu , instr_fields f){
 
     int32_t val1 = cpu_read_register(f.rs1, cpu);
     int32_t val2 = cpu_read_register(f.rs2, cpu);
-    printf("BLT: val1=%d val2=%d imm=%d\n", val1, val2, f.imm);
+    // printf("BLT: val1=%d val2=%d imm=%d\n", val1, val2, f.imm);
     if(val1 < val2){ //if this condition is true the branch will be taken
         cpu->pc = cpu->pc + f.imm;
     }
@@ -298,7 +298,7 @@ static void exec_srai(CPU * cpu , instr_fields f){
 
 static void exec_add(CPU * cpu , instr_fields f){
 
-    printf("ADD: rd=%d rs1=%d rs2=%d\n", f.rd, f.rs1, f.rs2);
+    // printf("ADD: rd=%d rs1=%d rs2=%d\n", f.rd, f.rs1, f.rs2);
     uint32_t val1 = cpu_read_register(f.rs1, cpu);
     uint32_t val2 = cpu_read_register(f.rs2, cpu);
     uint32_t ans = val1 + val2;
@@ -421,7 +421,7 @@ static void exec_ebreak(CPU *cpu) {
 
 void execute_instruction(CPU *cpu, instr_fields f) {
 
-    printf("executing opcode: 0x%02X funct3: 0x%02X\n", f.opcode, f.funct3);
+    // printf("executing opcode: 0x%02X funct3: 0x%02X\n", f.opcode, f.funct3);
     switch (f.opcode) {
         case OP_LUI:
             exec_lui(cpu, f);

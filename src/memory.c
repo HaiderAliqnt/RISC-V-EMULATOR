@@ -74,7 +74,7 @@ uint32_t memory_read32(uint32_t address){
 
 void  memory_write8(uint32_t address, uint8_t value){
 
-    printf("DEBUG write8: address=0x%08X value=0x%02X\n", address, value);
+    // printf("DEBUG write8: address=0x%08X value=0x%02X\n", address, value);
     if (handle_mmio_write(address, value)) return;
     check_bounds(address, 1);
     mem[address] = value;
@@ -92,7 +92,7 @@ void memory_write16(uint32_t address, uint16_t value){
 
 void memory_write32(uint32_t address, uint32_t value){
 
-    printf("DEBUG write8: address=0x%08X value=0x%02X\n", address, value);
+    // printf("DEBUG write8: address=0x%08X value=0x%02X\n", address, value);
     if (handle_mmio_write(address, value)) return;
     check_bounds(address , 4);
     mem[address] = (uint8_t)(value & 0XFF);

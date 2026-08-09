@@ -23,7 +23,7 @@ uint32_t cpu_read_register(uint8_t index, CPU * cpu){
 void cpu_write_register(uint8_t index, CPU * cpu, uint32_t value){
 
     if(index == 0){
-        printf("\nCan Not write to register 0\n");
+        // printf("\nCan Not write to register 0\n");
         return;
     }
     cpu->regs[index] = value;

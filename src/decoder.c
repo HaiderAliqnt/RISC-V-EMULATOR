@@ -90,12 +90,12 @@ instr_fields decoder_function(uint32_t instruction){
      fields.rs1 = (instruction >> 15) & ((1 << 5) -1) ; //0001 1111
      fields.rs2 = (instruction >> 20) & ((1 << 5) -1) ; //0001 1111
      fields.funct7 = (instruction >> 25) & ((1 << 7) -1) ; //0111 1111
-     printf("DECODER: raw=0x%08X opcode=0x%02X funct3=0x%02X rd=%d rs1=%d rs2=%d\n",
-            instruction, fields.opcode, fields.funct3, fields.rd, fields.rs1, fields.rs2);
+     // printf("DECODER: raw=0x%08X opcode=0x%02X funct3=0x%02X rd=%d rs1=%d rs2=%d\n",
+     //        instruction, fields.opcode, fields.funct3, fields.rd, fields.rs1, fields.rs2);
 
 
-    uint32_t test = (instruction >> 12) & 0x7;
-    printf("FUNCT3 TEST: raw=0x%08X shift_result=0x%02X\n", instruction, test);
+    // uint32_t test = (instruction >> 12) & 0x7;
+    // printf("FUNCT3 TEST: raw=0x%08X shift_result=0x%02X\n", instruction, test);
      //using a switch case statement to assign immediates if needed
      //for same instruction types but diff opcode we use fallbacks to avoid using same function twice and creating duplicates
      switch (fields.opcode) {
