@@ -2,10 +2,14 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include "../include/executor.h"
 #include "../include/cpu.h"
 #include "../include/decoder.h"
 #include "../include/memory.h"
+
+
+static uint32_t heap_ptr = 0x40000000;
 
 static void exec_lui(CPU * cpu , instr_fields f){
 
@@ -405,13 +409,174 @@ static void exec_slt(CPU * cpu , instr_fields f){
     cpu->pc += 4;
 }
 
+static void exec_mul(CPU *cpu, instr_fields f) {
+
+    int32_t val1 = (int32_t)cpu_read_register(f.rs1, cpu);
+    int32_t val2 = (int32_t)cpu_read_register(f.rs2, cpu);
+    uint32_t result = (uint32_t)(val1 * val2);  // lower 32 bits
+    cpu_write_register(f.rd, cpu, result);
+    cpu->pc += 4;
+}
+
+static void exec_mulh(CPU *cpu, instr_fields f) {
+
+    int64_t val1 = (int64_t)(int32_t)cpu_read_register(f.rs1, cpu);
+    int64_t val2 = (int64_t)(int32_t)cpu_read_register(f.rs2, cpu);
+    uint32_t result = (uint32_t)((val1 * val2) >> 32);  // upper 32 bits signed
+    cpu_write_register(f.rd, cpu, result);
+    cpu->pc += 4;
+}
+
+static void exec_mulhsu(CPU *cpu, instr_fields f) {
+
+    int64_t val1  = (int64_t)(int32_t)cpu_read_register(f.rs1, cpu);  // signed
+    uint64_t val2 = (uint64_t)cpu_read_register(f.rs2, cpu);           // unsigned
+    uint32_t result = (uint32_t)(((int64_t)(val1 * (int64_t)val2)) >> 32);
+    cpu_write_register(f.rd, cpu, result);
+    cpu->pc += 4;
+}
+
+static void exec_mulhu(CPU *cpu, instr_fields f) {
+
+    uint64_t val1 = (uint64_t)cpu_read_register(f.rs1, cpu);
+    uint64_t val2 = (uint64_t)cpu_read_register(f.rs2, cpu);
+    uint32_t result = (uint32_t)((val1 * val2) >> 32);  // upper 32 bits unsigned
+    cpu_write_register(f.rd, cpu, result);
+    cpu->pc += 4;
+}
+
+static void exec_div(CPU *cpu, instr_fields f) {
+
+    int32_t val1 = (int32_t)cpu_read_register(f.rs1, cpu);
+    int32_t val2 = (int32_t)cpu_read_register(f.rs2, cpu);
+    int32_t result;
+    if (val2 == 0) {
+        result = -1;                          // division by zero returns -1
+    } else if (val1 == INT32_MIN && val2 == -1) {
+        result = INT32_MIN;                   // overflow case
+    } else {
+        result = val1 / val2;
+    }
+    cpu_write_register(f.rd, cpu, (uint32_t)result);
+    cpu->pc += 4;
+}
+
+static void exec_divu(CPU *cpu, instr_fields f) {
+
+    uint32_t val1 = cpu_read_register(f.rs1, cpu);
+    uint32_t val2 = cpu_read_register(f.rs2, cpu);
+    uint32_t result;
+    if (val2 == 0) {
+        result = 0xFFFFFFFF;                  // division by zero returns max uint
+    } else {
+        result = val1 / val2;
+    }
+    cpu_write_register(f.rd, cpu, result);
+    cpu->pc += 4;
+}
+
+static void exec_rem(CPU *cpu, instr_fields f) {
+
+    int32_t val1 = (int32_t)cpu_read_register(f.rs1, cpu);
+    int32_t val2 = (int32_t)cpu_read_register(f.rs2, cpu);
+    int32_t result;
+    if (val2 == 0) {
+        result = val1;                        // remainder of div by zero is dividend
+    } else if (val1 == INT32_MIN && val2 == -1) {
+        result = 0;                           // overflow case remainder is 0
+    } else {
+        result = val1 % val2;
+    }
+    cpu_write_register(f.rd, cpu, (uint32_t)result);
+    cpu->pc += 4;
+}
+
+static void exec_remu(CPU *cpu, instr_fields f) {
+
+    uint32_t val1 = cpu_read_register(f.rs1, cpu);
+    uint32_t val2 = cpu_read_register(f.rs2, cpu);
+    uint32_t result;
+    if (val2 == 0) {
+        result = val1;                        // remainder of div by zero is dividend
+    } else {
+        result = val1 % val2;
+    }
+    cpu_write_register(f.rd, cpu, result);
+    cpu->pc += 4;
+}
+
+
+
+
+
+
+
 static void exec_fence(CPU *cpu) {
     cpu->pc += 4; // no-op for single core
 }
 
 static void exec_ecall(CPU *cpu) {
-    printf("ECALL at PC: 0x%08X\n", cpu->pc);
-    exit(0);  // clean halt for now
+    // printf("ECALL at PC: 0x%08X\n", cpu->pc);
+    // exit(0);  // clean halt for now
+    uint32_t syscall_num = cpu_read_register(17, cpu);  // a7
+    uint32_t arg0        = cpu_read_register(10, cpu);  // a0
+    uint32_t arg1        = cpu_read_register(11, cpu);  // a1
+    uint32_t arg2        = cpu_read_register(12, cpu);  // a2
+
+    switch (syscall_num) {
+
+        case 63: {  // read — keyboard input
+            // arg0 = fd, arg1 = buffer address, arg2 = count
+            // for now return 0 (no input available)
+            // later hook into SDL keyboard events
+            cpu_write_register(10, cpu, 0);
+            break;
+        }
+
+        case 64: {  // write — alternative UART path
+            // arg0 = fd, arg1 = buffer address, arg2 = count
+            uint32_t buf_addr = arg1;
+            uint32_t count    = arg2;
+            for (uint32_t i = 0; i < count; i++) {
+                char c = (char)memory_read8(buf_addr + i);
+                putchar(c);
+            }
+            fflush(stdout);
+            cpu_write_register(10, cpu, count);  // return bytes written
+            break;
+        }
+
+        case 80: {  // fstat — file status
+            // DOOM calls this to check if stdout is a terminal
+            // write a zeroed stat struct to the buffer at arg1
+            // and return 0 (success)
+            uint32_t stat_addr = arg1;
+            for (uint32_t i = 0; i < 128; i++) {  // stat struct is ~128 bytes
+                memory_write8(stat_addr + i, 0);
+            }
+            cpu_write_register(10, cpu, 0);  // return success
+            break;
+        }
+
+        case 214: {  // sbrk — heap allocation
+            uint32_t old_heap = heap_ptr;
+            heap_ptr += arg0;
+            cpu_write_register(10, cpu, old_heap);
+            break;
+        }
+
+        case 93: {  // exit
+            printf("Program exited with code %d\n", arg0);
+            exit((int)arg0);
+        }
+
+        default:
+            printf("Unhandled ECALL: syscall=%d a0=0x%08X a1=0x%08X a2=0x%08X at PC: 0x%08X\n",
+                   syscall_num, arg0, arg1, arg2, cpu->pc);
+            cpu_write_register(10, cpu, (uint32_t)-1);
+            break;
+    }
+    cpu->pc += 4;
 }
 
 static void exec_ebreak(CPU *cpu) {
@@ -494,6 +659,22 @@ void execute_instruction(CPU *cpu, instr_fields f) {
             }
             break;
         case OP_REG:
+            if (f.funct7 == 0x01) {  // M extension
+                switch (f.funct3) {
+                    case 0x0: exec_mul(cpu, f);    break;
+                    case 0x1: exec_mulh(cpu, f);   break;
+                    case 0x2: exec_mulhsu(cpu, f); break;
+                    case 0x3: exec_mulhu(cpu, f);  break;
+                    case 0x4: exec_div(cpu, f);    break;
+                    case 0x5: exec_divu(cpu, f);   break;
+                    case 0x6: exec_rem(cpu, f);    break;
+                    case 0x7: exec_remu(cpu, f);   break;
+                    default:
+                        printf("Unknown M ext funct3: 0x%02X at PC: 0x%08X\n", f.funct3, cpu->pc);
+                        exit(1);
+                }
+                break;
+            }
             switch (f.funct3) {
                 case F3_ADD_SUB:
                     switch (f.funct7) {

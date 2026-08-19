@@ -6,6 +6,15 @@
 #define MEMORY_SIZE 0X10000000 //256MB
 
 #define UART_BASE 0X10000000 //Mem mapped I/O addr
+#define TIMER_BASE 0x30000000
+#define FRAMEBUFFER_BASE  0x20000000
+#define SCREEN_WIDTH      320
+#define SCREEN_HEIGHT     200
+#define FRAMEBUFFER_SIZE  (SCREEN_WIDTH * SCREEN_HEIGHT)
+#define VSYNC_BASE        0x20010000
+#define PALETTE_BASE      0x20020000
+#define HEAP_BASE 0x40000000
+#define HEAP_SIZE 0x04000000
 
 void memory_init(void);
 void memory_free(void);
