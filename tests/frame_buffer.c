@@ -4,17 +4,20 @@
 #define WIDTH      320
 #define HEIGHT     200
 
-void _start() {
+int main(void) {
     volatile uint8_t  *fb    = (volatile uint8_t  *)FB_BASE;
     volatile uint32_t *vsync = (volatile uint32_t *)VSYNC_BASE;
 
-    // fill screen with color index 5
     for (int i = 0; i < WIDTH * HEIGHT; i++) {
         fb[i] = 5;
     }
 
-    // trigger frame render
     *vsync = 1;
+    volatile int x = 0;
 
-    __asm__("ebreak");
+    while (1) {
+        x++;
+    }
+
+    return 0;
 }

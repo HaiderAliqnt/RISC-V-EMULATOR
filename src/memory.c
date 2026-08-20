@@ -28,6 +28,10 @@ static void render_frame(void) {
 }
 
 static int handle_mmio_write(uint32_t address, uint32_t value) {
+
+
+
+
     if (address == UART_BASE) {
         putchar((char)(value & 0xFF));  // UART output... prints the character
         fflush(stdout);
@@ -35,10 +39,11 @@ static int handle_mmio_write(uint32_t address, uint32_t value) {
     }
 
     // Framebuffer — each byte is a palette index
-     if (address >= FRAMEBUFFER_BASE &&
-            address <  FRAMEBUFFER_BASE + FRAMEBUFFER_SIZE) {
-            framebuffer[address - FRAMEBUFFER_BASE] = (uint8_t)(value & 0xFF);
-            return 1;
+    if (address >= FRAMEBUFFER_BASE &&
+        address <  FRAMEBUFFER_BASE + FRAMEBUFFER_SIZE) {
+        // printf("FB write OK: 0x%08X\n", address);
+        framebuffer[address - FRAMEBUFFER_BASE] = (uint8_t)(value & 0xFF);
+        return 1;
     }
 
         // Palette write — DOOM writes palette data to a specific address
@@ -61,17 +66,28 @@ static int handle_mmio_write(uint32_t address, uint32_t value) {
                 return 1;
     }
     if (address == VSYNC_BASE) {
-            render_frame();
-            SDL_Event event;
-            while (SDL_PollEvent(&event)) {
-                if (event.type == SDL_QUIT) {
-                    exit(0);
-                }
-            }
-            return 1;
+        printf("VSYNC hit\n");
+        render_frame();
+        // SDL_Event event;
+        // while (SDL_PollEvent(&event)) {
+        //     if (event.type == SDL_QUIT) {
+        //             exit(0);
+        //     }
+        // }
+        return 1;
     }
-
+    // printf("MMIO miss: 0x%08X\n", address);
     return 0;  // not an MMIO address
+}
+
+void init_default_palette(void) {
+    memset(palette, 0, sizeof(palette));
+    palette[0] = 0xFF000000;  // black
+    palette[1] = 0xFFFFFFFF;  // white
+    palette[2] = 0xFFFF0000;  // red
+    palette[3] = 0xFF00FF00;  // green
+    palette[4] = 0xFF0000FF;  // blue
+    palette[5] = 0xFFFF00FF;  // magenta — this is what your test writes
 }
 
 static void check_bounds(uint32_t address , uint32_t size){
@@ -114,6 +130,8 @@ void memory_init(void){
         SCREEN_WIDTH,
         SCREEN_HEIGHT
     );
+
+    init_default_palette();
 }
 
 void memory_free(void){

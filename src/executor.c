@@ -47,6 +47,9 @@ static void exec_jalr(CPU * cpu , instr_fields f){
 
     uint32_t value = (cpu->pc + 4);
     uint32_t target = (cpu_read_register(f.rs1, cpu) + f.imm) & ~1; //calculate target and remove the 0 bit
+    // printf("JALR: rs1=x%d val=0x%08X imm=%d target=0x%08X rd=x%d return=0x%08X\n",
+    //            f.rs1, cpu_read_register(f.rs1, cpu), f.imm, target, f.rd, value);
+        cpu_write_register(f.rd, cpu, value);
     cpu_write_register(f.rd , cpu, value); //writed pc+4 into rd
     cpu->pc = target; //now give pc that value so it can jump onto it
 
@@ -587,6 +590,7 @@ static void exec_ebreak(CPU *cpu) {
 void execute_instruction(CPU *cpu, instr_fields f) {
 
     // printf("executing opcode: 0x%02X funct3: 0x%02X\n", f.opcode, f.funct3);
+    // printf("EXEC: opcode=0x%02X pc=0x%08X\n", f.opcode, cpu->pc);
     switch (f.opcode) {
         case OP_LUI:
             exec_lui(cpu, f);
@@ -707,7 +711,7 @@ void execute_instruction(CPU *cpu, instr_fields f) {
             break;
         case OP_FENCE:
             exec_fence(cpu);
-            break;
+        break;
         case OP_SYSTEM:
             if ((f.imm & 0xFFF) == 0x000) exec_ecall(cpu);
             else if ((f.imm & 0xFFF) == 0x001) exec_ebreak(cpu);
@@ -715,7 +719,7 @@ void execute_instruction(CPU *cpu, instr_fields f) {
                 printf("Unknown SYSTEM instruction at PC: 0x%08X\n", cpu->pc);
                 exit(1);
             }
-            break;
+        break;
         default:
             printf("Unknown opcode: 0x%02X at PC: 0x%08X\n", f.opcode, cpu->pc);
             exit(1);
