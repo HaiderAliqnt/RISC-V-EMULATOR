@@ -11,7 +11,7 @@ static SDL_Window   *window   = NULL;
 static SDL_Renderer *renderer = NULL;
 static SDL_Texture  *texture  = NULL;
 static uint32_t      palette[256];  // DOOM color palette
-static uint8_t       framebuffer[SCREEN_WIDTH * SCREEN_HEIGHT];
+static uint32_t       framebuffer[SCREEN_WIDTH * SCREEN_HEIGHT] ;
 static uint8_t *heap = NULL;
 static uint8_t *mem = NULL;
 
@@ -21,16 +21,13 @@ static void render_frame(void) {
     for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
         pixels[i] = palette[framebuffer[i]];
     }
-    SDL_UpdateTexture(texture, NULL, pixels, SCREEN_WIDTH * sizeof(uint32_t));
+    SDL_UpdateTexture(texture, NULL, framebuffer, SCREEN_WIDTH * sizeof(uint32_t));
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_RenderPresent(renderer);
 }
 
 static int handle_mmio_write(uint32_t address, uint32_t value) {
-
-
-
 
     if (address == UART_BASE) {
         putchar((char)(value & 0xFF));  // UART output... prints the character
@@ -42,28 +39,30 @@ static int handle_mmio_write(uint32_t address, uint32_t value) {
     if (address >= FRAMEBUFFER_BASE &&
         address <  FRAMEBUFFER_BASE + FRAMEBUFFER_SIZE) {
         // printf("FB write OK: 0x%08X\n", address);
-        framebuffer[address - FRAMEBUFFER_BASE] = (uint8_t)(value & 0xFF);
+        // framebuffer[address - FRAMEBUFFER_BASE] = (uint8_t)(value & 0xFF);
+        uint32_t pixel_index = (address - FRAMEBUFFER_BASE) / 4;
+        framebuffer[pixel_index] = value;
         return 1;
     }
 
-        // Palette write — DOOM writes palette data to a specific address
-        // 256 colors x 3 bytes (RGB) = 768 bytes
+    // Palette write — DOOM writes palette data to a specific address
+    // 256 colors x 3 bytes (RGB) = 768 bytes
     if (address >= PALETTE_BASE && address < PALETTE_BASE + 768) {
             int32_t index = address - PALETTE_BASE;  // byte offset into palette data
-                uint32_t color_index = index / 3;         // which color (0-255)
-                uint32_t channel     = index % 3;         // 0=R, 1=G, 2=B
+            uint32_t color_index = index / 3;         // which color (0-255)
+            uint32_t channel     = index % 3;         // 0=R, 1=G, 2=B
 
-                static uint8_t rgb[256][3];               // temporary storage for RGB bytes
-                rgb[color_index][channel] = (uint8_t)(value & 0xFF);
+            static uint8_t rgb[256][3];               // temporary storage for RGB bytes
+            rgb[color_index][channel] = (uint8_t)(value & 0xFF);
 
-                // once all 3 channels are written, build the ARGB value
-                if (channel == 2) {
-                    palette[color_index] = (0xFF      << 24) |
-                        (rgb[color_index][0] << 16) |
-                        (rgb[color_index][1] << 8)  |
-                        (rgb[color_index][2]);
-                }
-                return 1;
+            // once all 3 channels are written, build the ARGB value
+            if (channel == 2) {
+                palette[color_index] = (0xFF      << 24) |
+                (rgb[color_index][0] << 16) |
+                (rgb[color_index][1] << 8)  |
+                (rgb[color_index][2]);
+            }
+            return 1;
     }
     if (address == VSYNC_BASE) {
         printf("VSYNC hit\n");

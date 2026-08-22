@@ -4,3 +4,4 @@ hello
 hello.s
 build/
 compile_commands.json
+doomgeneric/*
