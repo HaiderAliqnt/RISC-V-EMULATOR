@@ -3,11 +3,12 @@
 #include <stdio.h>
 
 static int32_t sign_extend(uint32_t value, uint8_t bit){
-    //we are gonna check over here if the MSB which is the 12th bit in the imm == 1
-    if(value & (1 << bit)){ //if this returns true that means MSB is 1
-        value |=0xFFFFF000;  //using OR we are going to fill the remaining bits with 1
+    // Check if the sign bit (at position `bit`) is set
+    if (value & (1u << bit)) {
+        // Fill everything from bit+1 upward with 1s
+        value |= (~0u << (bit + 1));
     }
-    return value;
+    return (int32_t)value;
 }
 
 static int32_t decode_imm_i(uint32_t instruction){

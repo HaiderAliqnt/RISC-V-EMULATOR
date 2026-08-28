@@ -520,6 +520,8 @@ static void exec_fence(CPU *cpu) {
 
 static void exec_ecall(CPU *cpu) {
     // printf("ECALL at PC: 0x%08X\n", cpu->pc);
+    printf("[ECALL] a7=%d a0=0x%08x a1=0x%08x a2=0x%08x pc=0x%08x\n",
+           cpu->regs[17], cpu->regs[10], cpu->regs[11], cpu->regs[12], cpu->pc);
     // exit(0);  // clean halt for now
     uint32_t syscall_num = cpu_read_register(17, cpu);  // a7
     uint32_t arg0        = cpu_read_register(10, cpu);  // a0
@@ -561,10 +563,24 @@ static void exec_ecall(CPU *cpu) {
             break;
         }
 
-        case 214: {  // sbrk — heap allocation
-            uint32_t old_heap = heap_ptr;
-            heap_ptr += arg0;
-            cpu_write_register(10, cpu, old_heap);
+        case 214: {
+            if (arg0 == 0) {
+                cpu_write_register(10, cpu, heap_ptr);
+            } else {
+                uint32_t requested = arg0;
+                // Round up to the next 4KB page boundary, like a real brk() would.
+                // This gives malloc's internal bookkeeping the small amount of
+                // slack it needs to satisfy minimum-remainder-chunk checks.
+                uint32_t page_aligned = (requested + 0xFFF) & ~0xFFFu;
+                if (page_aligned >= HEAP_BASE && page_aligned <= HEAP_BASE + HEAP_SIZE) {
+                    heap_ptr = page_aligned;
+                }
+                cpu_write_register(10, cpu, heap_ptr);
+            }
+            break;
+        }
+        case 57: {  // close
+            cpu_write_register(10, cpu, 0);  // success
             break;
         }
 

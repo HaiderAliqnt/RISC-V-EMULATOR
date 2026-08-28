@@ -5,3 +5,5 @@ hello.s
 build/
 compile_commands.json
 doomgeneric/*
+freedm-0.13.0/*
+elf/*

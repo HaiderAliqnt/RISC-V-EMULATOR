@@ -15,6 +15,15 @@ static uint32_t       framebuffer[SCREEN_WIDTH * SCREEN_HEIGHT] ;
 static uint8_t *heap = NULL;
 static uint8_t *mem = NULL;
 
+// Current PC, updated by the fetch-decode-execute loop in main.c every
+// cycle via memory_set_current_pc(). This lets check_bounds() report which
+// instruction triggered a bad access, without needing a CPU struct pointer
+// threaded through every memory function.
+static uint32_t current_pc = 0;
+
+void memory_set_current_pc(uint32_t pc) {
+    current_pc = pc;
+}
 
 static void render_frame(void) {
     uint32_t pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
@@ -93,7 +102,8 @@ static void check_bounds(uint32_t address , uint32_t size){
 
     if (address + size <= MEMORY_SIZE) return;
     if (address >= HEAP_BASE && address + size <= HEAP_BASE + HEAP_SIZE) return;
-    fprintf(stderr, "Memory access out of bounds: 0x%08X\n", address);
+    fprintf(stderr, "Memory access out of bounds: 0x%08X (size=%u) at PC=0x%08X\n",
+            address, size, current_pc);
     exit(1);
 }
 

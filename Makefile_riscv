@@ -1,0 +1,31 @@
+CC = riscv64-unknown-elf-gcc
+CFLAGS = -march=rv32im -mabi=ilp32 -nostartfiles -O2 -Idoomgeneric/doomgeneric
+LDFLAGS = -T link.ld -lc -lm -lgcc
+
+DOOM_SRCS = $(filter-out \
+    doomgeneric/doomgeneric/doomgeneric_%.c \
+    doomgeneric/doomgeneric/i_allegromusic.c \
+    doomgeneric/doomgeneric/i_allegrosound.c \
+    doomgeneric/doomgeneric/i_sdlmusic.c \
+    doomgeneric/doomgeneric/i_sdlsound.c \
+    doomgeneric/doomgeneric/i_cdmus.c \
+    doomgeneric/doomgeneric/i_joystick.c, \
+    $(wildcard doomgeneric/doomgeneric/*.c)) \
+    doomgeneric/doomgeneric_riscv.c
+OBJS = $(DOOM_SRCS:.c=.o)
+
+doom.elf: start.o $(OBJS) freedm_wad.o link.ld
+	$(CC) $(CFLAGS) -o doom.elf start.o $(OBJS) freedm_wad.o $(LDFLAGS)
+
+start.o: start.S
+	$(CC) $(CFLAGS) -c start.S -o start.o
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+debug:
+	@echo "Sources found:"
+	@echo $(DOOM_SRCS)
+
+clean:
+	rm -f $(OBJS) start.o doom.elf
